@@ -1,4 +1,5 @@
 import subprocess
+import logging
 
 class pyinfa:
     def __init__(self, username, password):
@@ -28,11 +29,11 @@ class pyinfa:
     def format_output(self, command_output, processed_output, ignore_lines):
         #print(command_output)
         for line in command_output:
-            #print(line)
+            #logging.debug(line)
             if line and not any(s in line for s in ignore_lines):
                 # deduplicate as we go...
                 if line not in processed_output:
-                    #print('>>> {}'.format(line))
+                    logging.debug('>>> {}'.format(line))
                     processed_output.append(line)
 
     def run_infa_command(self, command, ignore_lines, output):
@@ -41,21 +42,21 @@ class pyinfa:
             universal_newlines=True)
 
         raw_output = []
-        print('--------------------')
-        print('{} - {}'.format(command[0], command[1]))
+        logging.debug('--------------------')
+        logging.debug('{} - {}'.format(command[0], command[1]))
 
         # Loop until command finished...
         while True:
             output_lines = process.stdout.readline()
             line = output_lines.strip()
             if line:
-                #print('> ' + line)
+                logging.debug('> ' + line)
                 raw_output.append(line)
 
             # Check for a return code i.e. command complete
             return_code = process.poll()
             if return_code is not None:
-                #print('>>> RETURN CODE: {}'.format(return_code))
+                logging.debug('>>> RETURN CODE: {}'.format(return_code))
                 break
         
         # process the output
@@ -84,7 +85,7 @@ class pyinfa:
         return retcode
 
     def ping(self, domain_name, repository_svc_name, integration_svc_name, timeout):
-        command = ['pmcmd', 'pingservice', '-d', domain_name, '-sv', integration_svc_name, '-t', timeout ]
+        command = ['pmcmd', 'pingservice', '-d', domain_name, '-sv', integration_svc_name, '-t', str(timeout) ]
         output=[]
         #retcode = self.run_infa_command(command, self.ignore_lines_general, output)
         return self.run_infa_command(command, ('',''), output)
@@ -114,7 +115,50 @@ class pyinfa:
         return retcode
 
     def startworkflow(self, domain_name, integration_svc_name, folder_name, workflow_name, timeout):
-        command = ['pmcmd', 'startworkflow', '-d', domain_name, '-sv', integration_svc_name, '-u', self.username, '-p', self.password, '-t', timeout, '-f', folder_name, '-wait', workflow_name ]
+        command = ['pmcmd', 'startworkflow', '-d', domain_name, '-sv', integration_svc_name, '-u', self.username, '-p', self.password, '-t', str(timeout), '-f', folder_name, '-wait', workflow_name ]
         output=[]
         #retcode = self.run_infa_command(command, self.ignore_lines_general, output)
         return self.run_infa_command(command, ('',''), output)
+
+    def listservices(self, domain_name, service_type, timeout, output):
+        # Valid service types AS|BW|CMS|DIS|IS|MM|MRS|RPS|RS|WS|ES|SCH|RMS|SEARCH
+        command = ['infacmd.sh', 'listservices', '-dn', domain_name, '-un', self.username, '-pd', self.password, '-re', str(timeout), '-st', service_type ]
+        temp=[]
+        #retcode = self.run_infa_command(command, self.ignore_lines_general, output)
+        retcode = self.run_infa_command(command, self.ignore_lines_general, temp)
+        for item in temp:
+            output.append([service_type, item])
+        return retcode
+
+    def listnodes(self, domain_name, timeout, output):
+        command = ['infacmd.sh', 'listnodes', '-dn', domain_name, '-un', self.username, '-pd', self.password, '-re', str(timeout) ]
+        temp=[]
+        #retcode = self.run_infa_command(command, self.ignore_lines_general, output)
+        retcode = self.run_infa_command(command, self.ignore_lines_general, temp)
+        for item in temp:
+            output.append(item)
+        return retcode
+
+    def listlicenses(self, domain_name, timeout, output):
+        command = ['infacmd.sh', 'listlicenses', '-dn', domain_name, '-un', self.username, '-pd', self.password, '-re', str(timeout) ]
+        temp=[]
+        #retcode = self.run_infa_command(command, self.ignore_lines_general, output)
+        retcode = self.run_infa_command(command, self.ignore_lines_general, temp)
+
+        # returns license like '10.1.0_License_localhost.localdomain_136933 (136933)' - need to remove the part in brackets
+        for item in temp:
+            name = item[:item.find(' ')]
+            #logging.debug('>{}<'.format(name))
+            output.append(name)
+        return retcode
+
+    def showlicense(self, domain_name, license_name, timeout, output):
+        command = ['infacmd.sh', 'showlicense', '-dn', domain_name, '-ln', license_name, '-un', self.username, '-pd', self.password, '-re', str(timeout) ]
+        temp=[]
+        #retcode = self.run_infa_command(command, self.ignore_lines_general, output)
+        retcode = self.run_infa_command(command, self.ignore_lines_general, temp)
+        for item in temp:
+            key = item[:item.find(':')]
+            value = item[item.find(':')+1:].lstrip()
+            output.append([key, value])
+        return retcode
