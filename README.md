@@ -1,15 +1,20 @@
 # pyinfa
-Python class to make PowerCenter command line tools easier to use
+Python class to make PowerCenter command line tools easier to use.
 
 Curently supports:
 
-- pmrep   version
-- pmrep   connect
-- pmrep   listfolders
-- pmrep   listworkfolders
+## pmrep
+- pmrep version
+- pmrep connect
+- pmrep listfolders
+- pmrep listworkfolders
 
-- pmcmd   ping
-- pmcmd   startworkflow
+## pmcmd
+- pmcmd ping
+- pmcmd startworkflow
 
+## infacmd
 - infacmd listservices
 - infacmd listnodes
+- infacmd listlicenses
+- infacmd showlicense
