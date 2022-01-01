@@ -18,3 +18,4 @@ Curently supports:
 - infacmd listnodes
 - infacmd listlicenses
 - infacmd showlicense
+- infacmd getlog

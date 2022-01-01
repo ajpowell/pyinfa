@@ -3,6 +3,9 @@ import logging
 
 class pyinfa:
     def __init__(self, username, password):
+        # TODO: Add code to work out if we are running on client or server
+        # TODO: Add code to work out filenames (pmrep vs pmrep.exe)
+        
         #self.domain_name = domain_name
         self.username = username
         self.password = password
@@ -161,4 +164,19 @@ class pyinfa:
             key = item[:item.find(':')]
             value = item[item.find(':')+1:].lstrip()
             output.append([key, value])
+        return retcode
+
+    def getLog(self, domain_name, service_type, timeout, output):
+        command = ['infacmd.sh', 'getlog', 
+            '-dn', domain_name, 
+            '-fm', 'XML', 
+            '-st', service_type, 
+            '-un', self.username, 
+            '-pd', self.password, 
+            '-re', str(timeout) 
+            ]
+        temp=[]
+        #retcode = self.run_infa_command(command, self.ignore_lines_general, output)
+        retcode = self.run_infa_command(command, ['Fetched ','Command ran '], output)
+
         return retcode
