@@ -1,5 +1,6 @@
 import logging
 import os
+import sys
 import pyinfa
 import datetime
 
@@ -14,9 +15,9 @@ def main():
     infa_home=os.getenv('INFA_HOME')
     logging.info('INFA_HOME     : {}'.format(infa_home))
 
-    infa = pyinfa.pyinfa('cmd_user', 'cmd_user_password')
+    infa = pyinfa.pyinfa('Administrator', '5uB7BvycgyVK')
 
-    #infa.connect('Domain', 'Repository_01')
+    #infa.connect('Domain_DEV', 'Repository_DEV_01')
 
     #folder_list = []
     #infa.listfolders(folder_list)
@@ -30,6 +31,8 @@ def main():
     #retcode = infa.version(version_details)
     #logging.debug(retcode)
     #logging.info(version_details)
+
+    #sys.exit(1)
 
     #print(infa.ping('Domain', 'Repository_01', 'IntegrationService_01', 5))
 
@@ -58,7 +61,7 @@ def main():
     for service_code, service in services:
         output = []
         # Valid service types AS|BW|CMS|DIS|IS|MM|MRS|RPS|RS|WS|ES|SCH|RMS|SEARCH
-        if(infa.listservices('Domain', service_code, 5, output)==0):
+        if(infa.listservices('Domain_DEV', service_code, 5, output)==0):
             for item in output:
                 service_list.append(item)
 
@@ -74,16 +77,17 @@ def main():
     '''
     licences = []
     licence_details=[]
-    #infa.listlicenses('Domain', 5, licences)
-    #for licence in licences:
-    #    print(licence)
-    #    infa.showlicense('Domain',licence, '5', licence_details)
-    infa.showlicense('Domain','10.1.0_License_localhost.localdomain_136933', 5, licence_details)
-    print(licence_details)
+    infa.listlicenses('Domain_DEV', 5, licences)
+    for licence in licences:
+        print(licence)
+        infa.showlicense('Domain_DEV',licence, '5', licence_details)
+    #infa.showlicense('Domain_DEV','10.1.0_License_localhost.localdomain_136933', 5, licence_details)
+    #print(licence_details)
     '''
+    
 
     output = []
-    infa.getLog('Domain', 'RS', 5, output)
+    infa.getLog('Domain_DEV', 'RS', 5, output)
     print('\n\n==============================================================')
     full_xml = ''
     for entry in output:

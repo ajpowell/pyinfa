@@ -1,3 +1,8 @@
+# TODO: Add comments
+# TODO: Add datatypes on function definitions
+# TODO: Error checking - somewhat minimal at the moment!
+# TODO: Add tests - 
+
 import subprocess
 import logging
 
