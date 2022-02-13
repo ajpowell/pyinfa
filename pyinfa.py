@@ -41,24 +41,25 @@ class pyinfa:
             if line and not any(s in line for s in ignore_lines):
                 # deduplicate as we go...
                 if line not in processed_output:
-                    logging.debug('>>> {}'.format(line))
+                    #logging.debug('>>> {}'.format(line))
                     processed_output.append(line)
 
     def run_infa_command(self, command, ignore_lines, output):
+        logging.debug('--------------------')
+        logging.debug('{} - {}'.format(command[0], command[1]))
+
         process = subprocess.Popen(command,
             stdout=subprocess.PIPE,
             universal_newlines=True)
 
         raw_output = []
-        logging.debug('--------------------')
-        logging.debug('{} - {}'.format(command[0], command[1]))
-
+        
         # Loop until command finished...
         while True:
             output_lines = process.stdout.readline()
             line = output_lines.strip()
             if line:
-                logging.debug('> ' + line)
+                #logging.debug('> ' + line)
                 raw_output.append(line)
 
             # Check for a return code i.e. command complete
@@ -185,3 +186,33 @@ class pyinfa:
         retcode = self.run_infa_command(command, ['Fetched ','Command ran '], output)
 
         return retcode
+
+    def parse_userDetails(self, message, logintime):
+        # Example: 'User Administrator using application Integration Service (pmserver) on host localhost (127.0.0.1), port 33096, logged in successfully.'
+        end_username=message.find(' using')
+        username = message[5:end_username]
+        #print('Username:        >{}<'.format(username))
+        start_applicationname=message.find(' application ') + 13
+        end_applicationname=message.find(' on host ')
+        applicationname = message[start_applicationname:end_applicationname]
+        #print('Applicationname: >{}<'.format(applicationname))
+        start_hostname = end_applicationname + 9
+        end_hostname = message.find(', port')
+        hostname = message[start_hostname:end_hostname]
+        #print('Hostname:        >{}<'.format(hostname))
+        start_portnumber = end_hostname + 7
+        end_portnumber = message.find(', logged')
+        portnumber = message[start_portnumber:end_portnumber]
+        #print('Portnumber:      >{}<'.format(portnumber))
+
+        str_logintime = logintime.strftime("%Y-%m-%d %H:%M:%S.%f")
+        
+        logindata = {
+            'time': str_logintime,
+            'user': username, 
+            'application': applicationname,
+            'hostname': hostname, 
+            'port': portnumber
+            }
+        
+        return logindata
